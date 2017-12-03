@@ -5,14 +5,16 @@ output:
     keep_md: yes
 ---
 
-```{r global_options}
+
+```r
 knitr::opts_chunk$set(fig.path='figure/')
 ```
 
 
 ### Load data and process the Date column
 
-```{r echo=TRUE}
+
+```r
 download.file(url = "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", 
               destfile = "repdata_activity.zip")
 unzip(zipfile = "repdata_activity.zip", exdir = ".")
@@ -25,7 +27,8 @@ activitydata$date <- as.Date(as.character(activitydata$date), "%Y-%m-%d")
 
 ## 1. What is mean total number of steps taken per day?
 
-```{r echo=TRUE}
+
+```r
 dailysteps <- with(activitydata, 
                    aggregate(x=steps, by=list(date), FUN=sum, na.rm=TRUE))
 
@@ -35,16 +38,30 @@ dailymedian <- median(dailysteps$x)
 hist(dailysteps$x, 
      xlab = "Steps", main = "Frequency distribution of daily steps", 
      col = "blue")
+```
 
+![](figure/unnamed-chunk-2-1.png)<!-- -->
+
+```r
 print(paste("Mean of daily number of steps = ", dailymean))
-print(paste("Median of daily number of steps = ", dailymedian))
+```
 
+```
+## [1] "Mean of daily number of steps =  9354.22950819672"
+```
+
+```r
+print(paste("Median of daily number of steps = ", dailymedian))
+```
+
+```
+## [1] "Median of daily number of steps =  10395"
 ```
 
 ## 2. What is the average daily activity pattern?
 
-```{r echo=TRUE}
 
+```r
 intervalsteps <- with(activitydata,
                       aggregate(x=steps, by=list(interval), FUN=mean, na.rm=TRUE))
 names(intervalsteps) <- c("interval", "avgsteps")
@@ -55,23 +72,36 @@ plot(intervalsteps$interval, intervalsteps$avgsteps,
      xlab="Time of the day (hhmm)", ylab="Avg. number of steps", 
      main="Daily activity pattern")
 abline(v=maxinterval, lty=3)
+```
 
+![](figure/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 print(paste("Interval with maximum average number of steps is ", maxinterval))
+```
+
+```
+## [1] "Interval with maximum average number of steps is  835"
 ```
 
 ## 3. Imputing missing values
 
-```{r echo=TRUE}
 
+```r
 narows <- sum(!complete.cases(activitydata))
 print(paste("Number of rows with NA values = ", narows))
+```
+
+```
+## [1] "Number of rows with NA values =  2304"
 ```
 
 A new data set, which is a replica of the original data set, has been created 
 and any missing values have been replaced by average number of steps for the 
 corresponging interval. 
 
-```{r echo=TRUE}
+
+```r
 activitydataimp <- activitydata
 activitydataimp <- merge(activitydataimp, intervalsteps, 
                          by.x = "interval", by.y = "interval")
@@ -90,7 +120,11 @@ dailysteps2 <- with(activitydataimp,
                    aggregate(x=steps, by=list(date), FUN=sum))
 hist(dailysteps2$x, 
      xlab = "Steps", main = "Frequency distribution of daily steps", col = "blue")
+```
 
+![](figure/unnamed-chunk-5-1.png)<!-- -->
+
+```r
 dailymean2 <- mean(dailysteps2$x)
 dailymedian2 <- median(dailysteps2$x)
 
@@ -105,10 +139,19 @@ cat("Mean of daily number of steps =", dailymean2, "\n",
     "Median changed by:", medimp)
 ```
 
+```
+## Mean of daily number of steps = 10766.19 
+##  Median of daily number of steps = 10766.19 
+## 
+##  Due to the imputation of missing values, 
+##  Mean changed by: 1411.959 
+##  Median changed by: 371.1887
+```
+
 ## 4. Are there differences in activity patterns between weekdays and weekends?
 
-```{r echo=TRUE}
 
+```r
 wdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 activitydata$day <- factor((weekdays(activitydata$date) %in% wdays), 
          levels=c(FALSE, TRUE), labels=c('weekend', 'weekday')) 
@@ -131,5 +174,6 @@ with(intstepswend, plot(interval, avgsteps,
                         xlab = "Interval", ylab = "Avg.# of steps",
                         main = "Activity pattern on Weekends", 
                         type="l", col="red"))
-
 ```
+
+![](figure/unnamed-chunk-6-1.png)<!-- -->
